@@ -2,10 +2,10 @@
 Assignment: Quiz Application
 """
 
-
 score = 0
 max_points = 0
 highscore = 0
+
 questions = [
     {
         "type": "mcq",
