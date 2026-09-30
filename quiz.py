@@ -1,7 +1,12 @@
-"""
-Assignment: Quiz Application
-"""
+import random
 
+"""
+Assignment: Quiz Application with both multiple choice questions and open question.
+a name variable that is used throughout the quiz
+random order of the questions
+different scoring for different questions
+
+"""
 
 score = 0
 max_points = 0
@@ -50,30 +55,29 @@ questions = [
 ]
 
 name = input("Vad heter du? ")
-
-"""
-ToDo: add random question order
-"""
+print(f"Hej {name} välkommen till quizzet!")
 
 while True:
+    random.shuffle(questions)
+
     for question in questions:
         max_points += int(question["points"])
         print(question["q"])
         if question["type"] == "mcq":
-            answer = input(f"Välj ett alternativ (1) {question['options'][0]}, (2) {question['options'][1]}, (3) {question['options'][2]}): ")
+            answer = input(f"(1) {question['options'][0]} \n(2) {question['options'][1]} \n(3) {question['options'][2]})\nVälj ett alternativ: ")
             if int(answer) == question["answer"]:
                 score +=int(question["points"])
-                print("Rätt svar!")
+                print("\nRätt svar!\n")
             else:
-                print("Fel svar!")
+                print("\nFel svar!\n")
 
         elif question["type"] == "open":
             answer = input("Vad är svaret? :")
-            if answer.lower() == question["answer"].lower():
+            if answer.lower().strip() == question["answer"].lower():
                 score +=int(question["points"])
-                print("Rätt svar!")
+                print("\nRätt svar!\n")
             else:
-                print("Fel svar!")
+                print("\nFel svar!\n")
 
 
 
@@ -84,11 +88,11 @@ while True:
 
     if score > highscore:
         highscore = score
-        print(f"Grattis {name} ny highscore!")
+        print("Grattis till ny highscore!")
     else:
         print(f"Inte bästa resultatet {name}, nuvarande highscore är {highscore}!")
 
-    play_again = input(f"Vill du spel igen {name}? (Y/N)").lower()
+    play_again = input(f"\nVill du spel igen {name}? (Y/N)").lower().strip()
     if play_again == "y":
         score = 0
         max_points = 0
