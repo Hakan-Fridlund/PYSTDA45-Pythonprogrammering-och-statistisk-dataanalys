@@ -16,6 +16,7 @@ SUGGESTED IMPROVEMENTS:
 - rewrite the code to classes and functions to make it more readable and maintainable
 - add categories to the questions and let the user choose which category to play if wanted
 - separate code and data, read questions and highscore from file, no hardcoded questions inside code
+- use encrypted password for admin menu, saved as hash or salted hash, not plain text
 """
 
 import random
