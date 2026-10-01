@@ -4,6 +4,18 @@ Assignment: Quiz Application with both multiple choice questions and open questi
 - random order of the questions
 - different scoring for different questions
 - option to restart the quiz after finishing
+- case insensitive answers for questions
+SUGGESTED IMPROVEMENTS:
+- add hidden menu when writing admin as name, requiring a password to access the menu
+- menu to add new questions to the quiz
+- save the questions to a file and load them when starting from a file (JSON format)
+- save the highscore to the same file and load it when starting, showing top 5 after the quiz
+- change how many questions are asked in the quiz
+- defend against invalid input from the user
+- show answer key at the end of the quiz
+- rewrite the code to classes and functions to make it more readable and maintainable
+- add categories to the questions and let the user choose which category to play if wanted
+- separate code and data, read questions and highscore from file, no hardcoded questions inside code
 """
 
 import random
@@ -106,7 +118,6 @@ while True:
     if play_again == "y":
         score = 0   # reset score to 0 when playing again
         max_points = 0  # reset max_points to 0 when playing again
-        continue
     else:
         print("Tack för din tid, välkommen åter!")
         break
