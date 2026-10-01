@@ -1,26 +1,29 @@
+"""
+Assignment: Quiz Application with both multiple choice questions and open questions.
+- a name variable that is used throughout the quiz
+- random order of the questions
+- different scoring for different questions
+- option to restart the quiz after finishing
+"""
+
 import random
-
-"""
-Assignment: Quiz Application with both multiple choice questions and open question.
-a name variable that is used throughout the quiz
-random order of the questions
-different scoring for different questions
-
-"""
 
 score = 0
 max_points = 0
 highscore = 0
+
+# list of questions, nested with dictionaries with the:
+# question, answer, type, options (for multiple choice questions) and points for the question
 questions = [
     {
-        "type": "mcq",
+        "type": "mcq",                     # mcp = multiple choice question
         "q": "Hur många länder finns det i världen?",
         "options": ["195", "210", "95"],
         "answer": 1,
         "points": 3
     },
     {
-        "type": "open",
+        "type": "open",                      # open = open question
         "q": "Vilket land bor vi i?",
         "answer": "Sverige",
         "points": 1
@@ -58,13 +61,19 @@ name = input("Vad heter du? ")
 print(f"Hej {name} välkommen till quizzet!")
 
 while True:
-    random.shuffle(questions)
+    random.shuffle(questions) # shuffles the questions in random order each time the quiz is run
 
     for question in questions:
-        max_points += int(question["points"])
+        max_points += int(question["points"])  # adds the count for max points for each question
         print(question["q"])
         if question["type"] == "mcq":
-            answer = input(f"(1) {question['options'][0]} \n(2) {question['options'][1]} \n(3) {question['options'][2]})\nVälj ett alternativ: ")
+            answer = input(
+                f"(1) {question['options'][0]} \n"
+                f"(2) {question['options'][1]} \n"
+                f"(3) {question['options'][2]})\n"
+                "Välj ett alternativ: "
+            )
+
             if int(answer) == question["answer"]:
                 score +=int(question["points"])
                 print("\nRätt svar!\n")
@@ -78,7 +87,8 @@ while True:
                 print("\nRätt svar!\n")
             else:
                 print("\nFel svar!\n")
-
+        else:
+            print("Felaktig fråge-typ!") # error mseeage if question type is not recognized
 
 
     if score < 8:
@@ -94,9 +104,9 @@ while True:
 
     play_again = input(f"\nVill du spel igen {name}? (Y/N)").lower().strip()
     if play_again == "y":
-        score = 0
-        max_points = 0
+        score = 0   # reset score to 0 when playing again
+        max_points = 0  # reset max_points to 0 when playing again
         continue
     else:
-        print("Tack för din tid!")
+        print("Tack för din tid, välkommen åter!")
         break
