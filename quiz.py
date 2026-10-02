@@ -19,6 +19,7 @@ SUGGESTED IMPROVEMENTS:
 - add categories to the questions and let the user choose which category to play if wanted
 - separate code and data, read questions and highscore from file, no hardcoded questions inside code
 - use encrypted password for admin menu, saved as hash or salted hash, not plain text
+- being able to change password for admin menu from within the admin menu
 """
 
 import random
@@ -26,7 +27,7 @@ import random
 score = 0
 max_points = 0
 highscore = 0
-password = "admin123"  # password for admin menu, should be hashed in a real application
+PASSWORD = "admin123"  # password for admin menu, should be hashed in a real application
 
 # list of questions, nested with dictionaries with the:
 # question, answer, type, options (for multiple choice questions) and points for the question
@@ -76,7 +77,7 @@ questions = [
 name = input("Vad heter du? ")
 if name.lower().strip() == "admin":
     password_input = input("Ange lösenord: ")
-    if password == password_input:
+    if PASSWORD == password_input:
         print("Välkommen till admin-menyn!")
         # Admin menu code function call can be placed here
     else:
