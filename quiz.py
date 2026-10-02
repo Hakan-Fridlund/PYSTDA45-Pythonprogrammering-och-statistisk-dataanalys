@@ -5,9 +5,11 @@ Assignment: Quiz Application with both multiple choice questions and open questi
 - different scoring for different questions
 - option to restart the quiz after finishing
 - case insensitive answers for questions
-SUGGESTED IMPROVEMENTS:
 - add hidden menu when writing admin as name, requiring a password to access the menu
-- menu to add new questions to the quiz
+
+SUGGESTED IMPROVEMENTS:
+- use command line arguments when starting file to access the admin menu (argparse) 
+- admin menu to add new questions to the quiz
 - save the questions to a file and load them when starting from a file (JSON format)
 - save the highscore to the same file and load it when starting, showing top 5 after the quiz
 - change how many questions are asked in the quiz
@@ -24,6 +26,7 @@ import random
 score = 0
 max_points = 0
 highscore = 0
+password = "admin123"  # password for admin menu, should be hashed in a real application
 
 # list of questions, nested with dictionaries with the:
 # question, answer, type, options (for multiple choice questions) and points for the question
@@ -71,7 +74,15 @@ questions = [
 ]
 
 name = input("Vad heter du? ")
-print(f"Hej {name} välkommen till quizzet!")
+if name.lower().strip() == "admin":
+    password_input = input("Ange lösenord: ")
+    if password == password_input:
+        print("Välkommen till admin-menyn!")
+        # Admin menu code function call can be placed here
+    else:
+        print("Fel lösenord! Du har inte tillgång till admin-menyn.")
+
+print(f"Hej {name}, välkommen till quizzet!")
 
 while True:
     random.shuffle(questions) # shuffles the questions in random order each time the quiz is run
