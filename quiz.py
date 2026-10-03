@@ -12,7 +12,7 @@ SUGGESTED IMPROVEMENTS:
 - admin menu to add new questions to the quiz
 - save the questions to a file and load them when starting from a file (JSON format)
 - save the highscore to the same file and load it when starting, showing top 5 after the quiz
-- change how many questions are asked in the quiz
+- option for user to change how many questions are asked in the quiz, and what cathegory or mixed
 - defend against invalid input from the user
 - show answer key at the end of the quiz
 - rewrite the code to classes and functions to make it more readable and maintainable
@@ -27,10 +27,13 @@ import random
 score = 0
 max_points = 0
 highscore = 0
-PASSWORD = "admin123"  # password for admin menu, should be hashed in a real application
+PASSWORD = "admin123"  #TODO: password for admin menu, should be salted hash
 
-# list of questions, nested with dictionaries with the:
-# question, answer, type, options (for multiple choice questions) and points for the question
+
+#TODO: rewrite this to class instead.
+# text, answer, type, options (for multiple choice questions) and category
+# methods: check_answer()
+
 questions = [
     {
         "type": "mcq",                     # mcp = multiple choice question
@@ -73,7 +76,22 @@ questions = [
         "points": 3
     },
 ]
+#TODO: add CLASS for quiz. Attributes: title, questions (lista of Question-objects), cathegory or mixed, number of questions to ask
+# Methods: add_question(question), randomize_questions()
 
+#TODO: add CLASS Player, Keeps track of name and result
+# Attribut: name, score, answers_given (historik) 
+# Methods: answer_question(question, answer), get_score()
+
+#TODO: add function load_questions_from_file(path): before starting
+
+#TODO: add admin menu function to add and remove questions, change password, view highscore, etc.
+
+#TODO: add functions to use in the admin menu and save the question after adding it automatically
+
+#TODO: add function to get_answer(question) to get the answer from the user and check if it is correct with defend against invalid input from the user
+
+#TODO: rewrite to a function to make it more readable and maintainable
 name = input("Vad heter du? ")
 if name.lower().strip() == "admin":
     password_input = input("Ange lösenord: ")
@@ -85,6 +103,9 @@ if name.lower().strip() == "admin":
 
 print(f"Hej {name}, välkommen till quizzet!")
 
+
+
+#TODO: rewrite to a function to make it more readable and maintainable def run_quiz():
 while True:
     random.shuffle(questions) # shuffles the questions in random order each time the quiz is run
 
