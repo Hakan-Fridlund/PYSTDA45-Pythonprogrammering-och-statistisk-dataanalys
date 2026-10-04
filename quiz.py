@@ -2,7 +2,6 @@
 Assignment: Quiz Application with both multiple choice questions and open questions.
 - a name variable that is used throughout the quiz
 - random order of the questions
-- different scoring for different questions
 - option to restart the quiz after finishing
 - case insensitive answers for questions
 - add hidden menu when writing admin as name, requiring a password to access the menu
@@ -23,14 +22,19 @@ SUGGESTED IMPROVEMENTS:
 """
 
 import random
+import json
+import argparse
+import os
+import hashlib
 
+CATEGORIES = ("matematik", "natur", "geografi") # tuple for categories constant
 score = 0
 max_points = 0
 highscore = 0
-PASSWORD = "admin123"  #TODO: password for admin menu, should be salted hash
+PASSWORD = "admin123"  # TODO: password for admin menu should be salted hash and saved in file
 
 
-#TODO: rewrite this to class instead.
+# TODO: rewrite this to class instead. 2 subclasses for multiple choice questions and open questions.
 # text, answer, type, options (for multiple choice questions) and category
 # methods: check_answer()
 
@@ -76,22 +80,22 @@ questions = [
         "points": 3
     },
 ]
-#TODO: add CLASS for quiz. Attributes: title, questions (lista of Question-objects), cathegory or mixed, number of questions to ask
+# TODO: add CLASS for quiz. Attributes: title, questions (lista of Question-objects), cathegory or mixed, number of questions to ask
 # Methods: add_question(question), randomize_questions()
 
-#TODO: add CLASS Player, Keeps track of name and result
+# TODO: add CLASS Player, Keeps track of name and result
 # Attribut: name, score, answers_given (historik) 
 # Methods: answer_question(question, answer), get_score()
 
-#TODO: add function load_questions_from_file(path): before starting
+# TODO: add function load_questions_from_file(path): before starting
 
-#TODO: add admin menu function to add and remove questions, change password, view highscore, etc.
+# TODO: add admin menu function to add and remove questions, change password, view highscore, etc.
 
-#TODO: add functions to use in the admin menu and save the question after adding it automatically
+# TODO: add functions to use in the admin menu and save the question after adding it automatically
 
-#TODO: add function to get_answer(question) to get the answer from the user and check if it is correct with defend against invalid input from the user
+# TODO: add function to get_answer(question) to get the answer from the user and check if it is correct with defend against invalid input from the user
 
-#TODO: rewrite to a function to make it more readable and maintainable
+# TODO: rewrite to a function to make it more readable and maintainable get_user_name()
 name = input("Vad heter du? ")
 if name.lower().strip() == "admin":
     password_input = input("Ange lösenord: ")
@@ -105,7 +109,7 @@ print(f"Hej {name}, välkommen till quizzet!")
 
 
 
-#TODO: rewrite to a function to make it more readable and maintainable def run_quiz():
+# TODO: rewrite to a function to make it more readable and maintainable def run_quiz():
 while True:
     random.shuffle(questions) # shuffles the questions in random order each time the quiz is run
 
