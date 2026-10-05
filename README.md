@@ -47,6 +47,15 @@ As a practical laboratory playground to test out early engineering principles, t
 * **Statistical Inference:** Sampling, variation, confidence intervals, p-values, and hypothesis testing (A/B testing).
 * **Linear Algebra & Regression:** Vectors, matrices, and coordinate transformations linked directly to linear regression and practical data analysis.
 
+### 4. Agile Methodologies & Team Collaboration
+Beyond the technical stack, this course emphasizes how modern software teams actually organize and deliver work. We study and apply three core agile frameworks:
+
+* **SCRUM:** Structuring work into time-boxed sprints, with defined roles (Product Owner, Scrum Master, Development Team) and ceremonies (sprint planning, daily stand-ups, sprint review, and retrospective) to iteratively deliver working increments of a product.
+* **Kanban:** Visualizing workflow using a continuous-flow board (To Do / In Progress / Done), limiting work-in-progress to improve throughput and identify bottlenecks without fixed sprint cycles.
+* **Extreme Programming (XP):** Engineering-focused practices that reinforce code quality and collaboration, including pair programming, test-driven development (TDD), continuous integration, and frequent, small releases.
+
+These frameworks are applied hands-on throughout the course's group projects, using tools like GitHub Issues/Projects for backlog and task tracking, alongside VS Code Live Share for real-time pair programming sessions.
+
 ---
 
 ## 🎓 Learning Outcomes
