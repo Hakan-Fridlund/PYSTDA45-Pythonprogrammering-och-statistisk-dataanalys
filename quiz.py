@@ -88,25 +88,89 @@ questions = [
 # Methods: answer_question(question, answer), get_score()
 
 # TODO: add function load_questions_from_file(path): before starting
-
-# TODO: add admin menu function to add and remove questions, change password, view highscore, etc.
+def load_questions_from_file(path):
+    ...
+def save_questions_to_file(path):
+    ...
 
 # TODO: add functions to use in the admin menu and save the question after adding it automatically
+def admin_menu():
+    while True:
+        print("Admin menu")
+        print("1. Add question")
+        print("2. Remove question")
+        print("3. Change password")
+        print("4. View highscore")
+        print("5. Exit admin menu")
+        choice = input("Välj ett alternativ: ")
+
+        choice = get_menu_choice(["1", "2", "3", "4", "5"], "Välj ett alternativ (1-5): ")
+
+        match choice:
+            case "1":
+                add_question()
+            case "2":
+                remove_question()
+            case "3":
+                change_password()
+            case "4":
+                view_highscore()
+            case "5":
+                save_questions_to_file("questions.json")
+                break
+
+
+def get_menu_choice(valid_choices, prompt="Välj ett alternativ: "):
+    string_choices = [str(choice).strip() for choice in valid_choices]
+    while True:
+        choice = input(prompt).strip()
+        if choice in string_choices:
+            return choice
+        print(f"Ogiltigt val, försök igen.\n {prompt}")
+
+
+def add_question():
+    ...
+def remove_question():
+    ...
+def change_password():
+    ...
+def view_highscore():
+    ...
+
 
 # TODO: add function to get_answer(question) to get the answer from the user and check if it is correct with defend against invalid input from the user
 
-# TODO: rewrite to a function to make it more readable and maintainable get_user_name()
-name = input("Vad heter du? ")
-if name.lower().strip() == "admin":
-    password_input = input("Ange lösenord: ")
-    if PASSWORD == password_input:
-        print("Välkommen till admin-menyn!")
-        # Admin menu code function call can be placed here
-    else:
-        print("Fel lösenord! Du har inte tillgång till admin-menyn.")
 
-print(f"Hej {name}, välkommen till quizzet!")
+def get_user_name():
+    #get and return the user name, strip whitespace and capitalize first letter of each word
+    return input("Vad heter du? ").strip().lower().title()
 
+def main():
+    questions = load_questions_from_file("questions.json")  # Load questions from file at the start of the program
+    print("Välkommen till quizzet!")
+    
+    while True:
+        name = get_user_name()
+        
+        if name == "Admin":
+            if check_password("Ange lösenord: "):
+                admin_menu()
+                # När admin logs out, we move to next iteration of the loop (or break if you want to exit)
+                continue 
+            else:
+                print("Fel lösenord!")
+                continue
+                
+        # if not admin, we proceed to the quiz
+        print(f"Hej {name}, välkommen till quizzet!") # here we can add categegory selection if we implement it later
+        run_quiz()  
+        break
+
+def check_password(prompt):
+    ...
+def run_quiz():
+    ...
 
 
 # TODO: rewrite to a function to make it more readable and maintainable def run_quiz():
