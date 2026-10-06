@@ -4,6 +4,7 @@ Assignment: Quiz Application with both multiple choice questions and open questi
 - random order of the questions
 - option to restart the quiz after finishing
 - case insensitive answers for questions
+Added features:
 - add hidden menu when writing admin as name, requiring a password to access the menu
 
 SUGGESTED IMPROVEMENTS:
