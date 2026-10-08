@@ -12,7 +12,7 @@ SUGGESTED IMPROVEMENTS:
 - admin menu to add new questions to the quiz
 - save the questions to a file and load them when starting from a file (JSON format)
 - save the highscore to the same file and load it when starting, showing top 5 after the quiz
-- option for user to change how many questions are asked in the quiz, and what cathegory or mixed
+- option for user to change how many questions are asked in the quiz, and what category or mixed
 - defend against invalid input from the user
 - show answer key at the end of the quiz
 - rewrite the code to classes and functions to make it more readable and maintainable
@@ -34,55 +34,63 @@ max_points = 0
 highscore = 0
 PASSWORD = "admin123"  # TODO: password for admin menu should be salted hash and saved in file
 
+class Question:
+    """A quiz question with a text(the question) and a correct answer.
 
-# TODO: rewrite this to class instead. 2 subclasses for multiple choice questions and open questions.
-# text, answer, type, options (for multiple choice questions) and category
-# methods: check_answer()
+    check_answer() compares a given answer to the correct one.
+    """
 
-questions = [
-    {
-        "type": "mcq",                     # mcp = multiple choice question
-        "q": "Hur många länder finns det i världen?",
-        "options": ["195", "210", "95"],
-        "answer": 1,
-        "points": 3
-    },
-    {
-        "type": "open",                      # open = open question
-        "q": "Vilket land bor vi i?",
-        "answer": "Sverige",
-        "points": 1
-        },
-    {
-        "type":"open",
-        "q": "Vad blir 5*2 ?",
-        "answer": "10",
-        "points": 2
-    },
-    {
-        "type": "mcq",
-        "q": "Hur många ben har normalt en hund?",
-            "options": ["3", "2", "4"],
-            "answer": 3,
-            "points": 1
-    },
-    {
-        "type": "mcq",
-        "q": "Vilken planet är närmast solen?",
-        "options": ["Venus", "Merkurius", "Mars"],
-        "answer": 2,
-        "points": 2
-    },
-    {
-        "type": "mcq",
-        "q": "Vilket land har flest invånare?",
-        "options": ["Indien", "USA", "Kina"],
-        "answer": 1,
-        "points": 3
-    },
-]
-# TODO: add CLASS for quiz. Attributes: title, questions (lista of Question-objects), cathegory or mixed, number of questions to ask
-# Methods: add_question(question), randomize_questions()
+    def __init__(self, text, answer):
+        self.text = text
+        self.answer = answer
+
+    def __str__(self):
+        return f"Question: {self.text}\nAnswer: {self.answer}"
+
+    def check_answer(self, given_answer):
+        return given_answer == self.answer
+
+
+class OpenQuestion(Question):
+    """Free-text question sub-class. Used only for type checks."""
+
+
+class MultipleChoiceQuestion(Question):
+    """Question with a list of options to choose from."""
+
+    def __init__(self, text, answer, options):
+        super().__init__(text, answer)
+        self.options = options
+
+    def __str__(self):
+        options_text = "\n".join(
+            f"{i}. {opt}" for i, opt in enumerate(self.options, start=1)
+        )
+        return (f"Question: {self.text}\n"
+                f"Options: {options_text}\n"
+                f"Answer: {self.answer}")
+
+
+class Quiz:
+    """A quiz with a random selection of questions.
+
+    On init: Filters all_questions by category ("mixed" keeps every category),
+    shuffles them and keeps the first number_of_questions.
+    """
+    def __init__(self, all_questions, number_of_questions=3, category="blandat"):
+        self.category = category
+        self.number_of_questions = number_of_questions
+
+        if category == "blandat":
+            pool = all_questions[:]
+        else:
+            pool = [q for q in all_questions if q.category == category]
+        random.shuffle(pool)
+        self.questions = pool[:number_of_questions]
+
+    def __str__(self):
+        return (f"Number of questions: {self.number_of_questions}\nQuestions: {self.questions}\nCategory: {self.category}")    
+
 
 # TODO: add CLASS Player, Keeps track of name and result
 # Attribut: name, score, answers_given (historik) 
@@ -103,8 +111,6 @@ def admin_menu():
         print("3. Change password")
         print("4. View highscore")
         print("5. Exit admin menu")
-        choice = input("Välj ett alternativ: ")
-
         choice = get_menu_choice(["1", "2", "3", "4", "5"], "Välj ett alternativ (1-5): ")
 
         match choice:
@@ -122,6 +128,7 @@ def admin_menu():
 
 
 def get_menu_choice(valid_choices, prompt="Välj ett alternativ: "):
+    """used by admin_menu to check against faulty input"""
     string_choices = [str(choice).strip() for choice in valid_choices]
     while True:
         choice = input(prompt).strip()
@@ -139,88 +146,80 @@ def change_password():
 def view_highscore():
     ...
 
-
 # TODO: add function to get_answer(question) to get the answer from the user and check if it is correct with defend against invalid input from the user
+# check_answer is already available in class question
 
 
 def get_user_name():
-    #get and return the user name, strip whitespace and capitalize first letter of each word
+    """get and return the user name, strip whitespace and capitalize first letter of each word"""
     return input("Vad heter du? ").strip().lower().title()
 
+def is_valid_category(category):
+    """ checks if the category is valid in the Categories list and returns True/False"""
+    return category in CATEGORIES or category == "blandat"
+
+# should return True/False
+def check_password(prompt): 
+    ...
+
+# this function should print the questions, receive input and check if correct. and handle points     
+def run_quiz(quiz):
+    ...
+
+def get_number_of_questions(prompt, max_questions):
+    """takes input and checks if it is a integer in the valid interval and returns the number""" 
+    while True:
+        try:
+            number = int(input(prompt))
+        except ValueError:
+            print(f"Fel, ange ett heltal mellan 1 och {max_questions}")
+            continue
+
+        if 1 <= number <= max_questions:
+            return number
+        print(f"Ange ett heltal mellan 1 och {max_questions}.")
+
+
+def filter_by_category(all_questions, category):
+    """Return list of questions in the category ("blandat" returns all)."""
+    if category == "blandat":
+        return all_questions[:]
+    return [q for q in all_questions if q.category == category]
+
+
 def main():
-    questions = load_questions_from_file("questions.json")  # Load questions from file at the start of the program
-    print("Välkommen till quizzet!")
+    """Main function, loads questions at start and connects all input and menus in order."""
+    all_questions = load_questions_from_file("questions.json")  # Load questions from file at the start of the program
+    print("Välkommen!")
     
     while True:
         name = get_user_name()
         
         if name == "Admin":
-            if check_password("Ange lösenord: "):
+            if check_password(input("Ange lösenord: ")):
                 admin_menu()
-                # När admin logs out, we move to next iteration of the loop (or break if you want to exit)
-                continue 
-            else:
+                # when admin logs out, we move to next iteration of the loop (or break if you want to exit)
+            else: 
                 print("Fel lösenord!")
-                continue
-                
-        # if not admin, we proceed to the quiz
-        print(f"Hej {name}, välkommen till quizzet!") # here we can add categegory selection if we implement it later
-        run_quiz()  
-        break
+                break
 
-def check_password(prompt):
-    ...
-def run_quiz():
-    ...
-
-
-# TODO: rewrite to a function to make it more readable and maintainable def run_quiz():
-while True:
-    random.shuffle(questions) # shuffles the questions in random order each time the quiz is run
-
-    for question in questions:
-        max_points += int(question["points"])  # adds the count for max points for each question
-        print(question["q"])
-        if question["type"] == "mcq":
-            answer = input(
-                f"(1) {question['options'][0]} \n"
-                f"(2) {question['options'][1]} \n"
-                f"(3) {question['options'][2]})\n"
-                "Välj ett alternativ: "
-            )
-
-            if int(answer) == question["answer"]:
-                score +=int(question["points"])
-                print("\nRätt svar!\n")
+        # if not admin, we proceed to the next step
+        print(f"Hej {name}, välkommen till quizzet!")
+        # checks if category is valid in loop
+        while True:
+            category = input(f"Välj kategori: {CATEGORIES} eller blandat: ").strip().lower()
+            if is_valid_category(category):
+                break
             else:
-                print("\nFel svar!\n")
-
-        elif question["type"] == "open":
-            answer = input("Vad är svaret? :")
-            if answer.lower().strip() == question["answer"].lower():
-                score +=int(question["points"])
-                print("\nRätt svar!\n")
-            else:
-                print("\nFel svar!\n")
-        else:
-            print("Felaktig fråge-typ!") # error mseeage if question type is not recognized
+                print("Ogiltig kategori, försök igen.")
 
 
-    if score < 8:
-        print(f"{name} du fick {score} poäng av {max_points} möjliga. Försök igen!")
-    else:
-        print(f"{name} du fick {score} poäng av {max_points} möjliga. Bra jobbat!")
+        max_questions = len(filter_by_category(all_questions, category))
+        number = get_number_of_questions(f"Hur många frågor vill du ha?\n"
+            f"Max antal för {category} är {max_questions}: ", max_questions)
 
-    if score > highscore:
-        highscore = score
-        print("Grattis till ny highscore!")
-    else:
-        print(f"Inte bästa resultatet {name}, nuvarande highscore är {highscore}!")
+        my_quiz = Quiz(all_questions, number, category)
+        run_quiz(my_quiz)
 
-    play_again = input(f"\nVill du spel igen {name}? (Y/N)").lower().strip()
-    if play_again == "y":
-        score = 0   # reset score to 0 when playing again
-        max_points = 0  # reset max_points to 0 when playing again
-    else:
-        print("Tack för din tid, välkommen åter!")
-        break
+
+main()
