@@ -35,7 +35,7 @@ highscore = 0
 PASSWORD = "admin123"  # TODO: password for admin menu should be salted hash and saved in file
 
 class Question:
-    """A quiz question with a text(the question) and a correct answer.
+    """quiz question with a text(the question) and a correct answer.
 
     check_answer() compares a given answer to the correct one.
     """
@@ -56,7 +56,7 @@ class OpenQuestion(Question):
 
 
 class MultipleChoiceQuestion(Question):
-    """Question with a list of options to choose from."""
+    """Question subclass with a list of options to choose from."""
 
     def __init__(self, text, answer, options):
         super().__init__(text, answer)
@@ -102,8 +102,8 @@ def load_questions_from_file(path):
 def save_questions_to_file(path):
     ...
 
-# TODO: add functions to use in the admin menu and save the question after adding it automatically
 def admin_menu():
+    """ Runs the hidden admin menu to call admin functions"""
     while True:
         print("Admin menu")
         print("1. Add question")
@@ -146,10 +146,8 @@ def change_password():
 def view_highscore():
     ...
 
-# TODO: add function to get_answer(question) to get the answer from the user and check if it is correct with defend against invalid input from the user
-# check_answer is already available in class question
 
-
+# TODO:  add name from argparse iof written 
 def get_user_name():
     """get and return the user name, strip whitespace and capitalize first letter of each word"""
     return input("Vad heter du? ").strip().lower().title()
@@ -188,7 +186,7 @@ def filter_by_category(all_questions, category):
 
 
 def main():
-    """Main function, loads questions at start and connects all input and menus in order."""
+    """Main function, loads questions at start and then connects all input and menus in order."""
     all_questions = load_questions_from_file("questions.json")  # Load questions from file at the start of the program
     print("Välkommen!")
     
