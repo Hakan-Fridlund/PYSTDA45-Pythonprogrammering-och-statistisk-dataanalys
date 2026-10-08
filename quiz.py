@@ -33,6 +33,7 @@ score = 0
 max_points = 0
 highscore = 0
 PASSWORD = "admin123"  # TODO: password for admin menu should be salted hash and saved in file
+all_questions = []
 
 class Question:
     """quiz question with a text(the question) and a correct answer.
@@ -51,7 +52,7 @@ class Question:
         return given_answer == self.answer
 
 
-class OpenQuestion(Question):
+class OpenQuestion(Question): # pylint: disable=too-few-public-methods
     """Free-text question sub-class. Used only for type checks."""
 
 
@@ -71,7 +72,7 @@ class MultipleChoiceQuestion(Question):
                 f"Answer: {self.answer}")
 
 
-class Quiz:
+class Quiz: # pylint: disable=too-few-public-methods
     """A quiz with a random selection of questions.
 
     On init: Filters all_questions by category ("mixed" keeps every category),
@@ -89,18 +90,40 @@ class Quiz:
         self.questions = pool[:number_of_questions]
 
     def __str__(self):
-        return (f"Number of questions: {self.number_of_questions}\nQuestions: {self.questions}\nCategory: {self.category}")    
+        return (f"Number of questions: {self.number_of_questions}\nQuestions: {self.questions}\nCategory: {self.category}")
+    
+
+def load_questions_from_file(path="quiz_questions.json"):
+    """Loads the list of question-objects from file, used by main when starting"""
+    # controls if the file exists before trying to open
+    if not os.path.exists(path):
+        print(f"Hittade inte '{path}'. Returnerar en tom lista.")
+        return []
+    
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            # json.load reads the file and converts it back to a list
+            loaded_questions = json.load(file)
+        print(f"Frågorna har laddats in från {path}!")
+        return loaded_questions
+    except json.JSONDecodeError:
+        print(f"Fel: Filen '{path}' är skadad eller innehåller inte giltig JSON. Returnerar en tom lista.")
+        return []
+    except Exception as e:
+        print(f"Ett oväntat fel uppstod: {e}")
+        return []
 
 
-# TODO: add CLASS Player, Keeps track of name and result
-# Attribut: name, score, answers_given (historik) 
-# Methods: answer_question(question, answer), get_score()
-
-# TODO: add function load_questions_from_file(path): before starting
-def load_questions_from_file(path):
-    ...
-def save_questions_to_file(path):
-    ...
+def save_questions_to_file(path="quiz_questions.json"):
+    """ Saves the list of question-objects to json file, used by admin_menu when exiting"""
+    try:
+        with open(path, "w", encoding="utf-8") as file:
+            # json.dump sparar listan direkt till filen. indent=4 gör filen lättläst för människor.
+            # ensure_ascii=False ser till att å, ä, ö sparas korrekt.
+            json.dump(all_questions, file, indent=4, ensure_ascii=False)
+        print(f"Frågorna har sparats framgångsrikt i {path}!")
+    except Exception as e:
+        print(f"Ett fel uppstod när filen skulle sparas: {e}")
 
 def admin_menu():
     """ Runs the hidden admin menu to call admin functions"""
@@ -138,7 +161,27 @@ def get_menu_choice(valid_choices, prompt="Välj ett alternativ: "):
 
 
 def add_question():
-    ...
+    """Adds question by input. appends open och mpc-question to list"""
+    type = get_menu_choice(["1","2"],"Vill du lägga till en öppen eller flervalsfråga?\n(1) för öppen fråga\n(2) för flervalsfråga\n: ")
+    text = input("Ange din fråga: ")
+    if type == "1":
+        answer = input("Ange svaret: ").strip().lower()
+        my_question = OpenQuestion(text, answer)
+    else:
+        options = []
+        letters = "abcd"
+        for i in range(4):
+            letter = letters[i]
+            user_input = input(f"Ange svarsalternativ {letter}: ").strip().lower()
+            options.append(user_input)
+        answer = get_menu_choice(["a","b","c","d"],"Vilket är det rätta alternativet (a,b,c,d): ")
+        my_question = MultipleChoiceQuestion(text, answer, options)
+
+    all_questions.append(my_question)
+
+
+
+    
 def remove_question():
     ...
 def change_password():
@@ -147,7 +190,7 @@ def view_highscore():
     ...
 
 
-# TODO:  add name from argparse iof written 
+# TODO:  add name from argparse if written
 def get_user_name():
     """get and return the user name, strip whitespace and capitalize first letter of each word"""
     return input("Vad heter du? ").strip().lower().title()
@@ -157,10 +200,10 @@ def is_valid_category(category):
     return category in CATEGORIES or category == "blandat"
 
 # should return True/False
-def check_password(prompt): 
+def check_password(prompt):
     ...
 
-# this function should print the questions, receive input and check if correct. and handle points     
+# this function should print the questions, receive input and check if correct. and handle points
 def run_quiz(quiz):
     ...
 
@@ -187,7 +230,7 @@ def filter_by_category(all_questions, category):
 
 def main():
     """Main function, loads questions at start and then connects all input and menus in order."""
-    all_questions = load_questions_from_file("questions.json")  # Load questions from file at the start of the program
+    all_questions = load_questions_from_file("quiz_questions.json")  # Load questions from file at the start of the program
     print("Välkommen!")
     
     while True:
