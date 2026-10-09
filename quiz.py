@@ -13,9 +13,7 @@ Added features:
 - rewritten the code to classes and functions to make it more readable and maintainable
 - separated code and data, read questions, highscore and secure password from file
 - save highscore to file and load when starting, showing top 10 after the quiz is done.
-
-SUGGESTED IMPROVEMENTS:
-- use command line arguments when starting file to access the admin menu (argparse) 
+- use command line arguments when starting file to write name (argparse)
 """
 
 import random
@@ -352,7 +350,6 @@ def main():
             if check_password(input("Ange lösenord: ")):
                 admin_menu(all_questions, highscore_dict)
 
-                # when admin logs out, we move to next iteration of the loop
             else:
                 print("Fel lösenord!")
                 continue
