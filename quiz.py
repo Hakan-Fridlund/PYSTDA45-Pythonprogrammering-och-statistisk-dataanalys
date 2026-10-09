@@ -12,27 +12,24 @@ Added features:
 - defended against invalid input from the user
 - rewritten the code to classes and functions to make it more readable and maintainable
 - separated code and data, read questions, highscore and secure password from file
+- save highscore to file and load when starting, showing top 10 after the quiz is done.
 
 SUGGESTED IMPROVEMENTS:
 - use command line arguments when starting file to access the admin menu (argparse) 
-- save highscore to same file and load when starting, showing top 5 after the quiz.
-- use encrypted password for admin menu, saved as hash or salted hash, not plain text
-- being able to change password for admin menu from within the admin menu
 """
 
 import random
 import json
 import pickle
+from pickle import UnpicklingError
 import argparse
 import os
-import hashlib
 
 CATEGORIES = ("matematik", "natur", "geografi") # tuple for categories constant
 score = 0
 max_points = 0
-highscore = 0
-PASSWORD = "admin123"  # TODO: password for admin menu should be salted hash and saved in file
-
+highscore = {}
+PASSWORD = "admin123"
 class Question:
     """quiz question with a text(the question) and a correct answer.
 
@@ -118,7 +115,8 @@ class Quiz: # pylint: disable=too-few-public-methods
         self.questions = pool[:number_of_questions]
 
     def __str__(self):
-        return (f"Number of questions: {self.number_of_questions}\nQuestions: {self.questions}\nCategory: {self.category}")
+        return (f"Number of questions: "
+            f"{self.number_of_questions}\nQuestions: {self.questions}\nCategory: {self.category}")
 
 
 def admin_menu(all_questions):
@@ -128,10 +126,9 @@ def admin_menu(all_questions):
         print("1. Add question")
         print("2. Show questions")
         print("3. Remove question")
-        print("4. Change password")
-        print("5. View highscore")
-        print("6. Exit admin menu")
-        choice = get_menu_choice(["1", "2", "3", "4", "5", "6"], "Välj ett alternativ (1-6): ")
+        print("4. View highscore")
+        print("5. Exit admin menu")
+        choice = get_menu_choice(["1", "2", "3", "4", "5"], "Välj ett alternativ (1-5): ")
 
         match choice:
             case "1":
@@ -141,10 +138,8 @@ def admin_menu(all_questions):
             case "3":
                 remove_question(all_questions)
             case "4":
-                change_password()
-            case "5":
                 view_highscore()
-            case "6":
+            case "5":
                 Question.save_to_file(all_questions)
                 break
 
@@ -189,7 +184,7 @@ def show_questions(all_questions):
         return
     for i, q in enumerate(all_questions, start=1):
         print(f"{i}. [{q.category}]) {q.text}")
-    
+
 def remove_question(all_questions):
     """ shows all questions, takes index input to remove from list, 0 to cancel"""
     show_questions(all_questions)
@@ -203,58 +198,98 @@ def remove_question(all_questions):
     print(f"Tog bort: {removed.text}")
 
 
-def change_password():
-    ...
-def view_highscore():
-    ...
-def check_if_highscore(score):
-    ...
-# TODO load encrypted password from file
-def load_password(path):
-    ...
+def view_highscore(highscore_dict):
+    """prints the highscore if available."""
+    if not highscore_dict:
+        print("Topplistan är tom just nu!")
+        return
+    for name, current_score in highscore_dict.items():
+        print(f"{name}: {current_score} poäng")
 
+
+
+def check_if_highscore(name, current_score, highscore_dict, max_slots=5):
+    """checks if highscore and adds it to the highscore_dict"""
+    if len(highscore_dict) < max_slots or current_score > min(highscore_dict.values()):
+        highscore_dict[name] = current_score
+        print("Snyggt! Du tog en plats på topplistan!")
+
+        # if too many on list, remove the one with least score
+        if len(highscore_dict) > max_slots:
+            # find the name of the lowest score
+            lowest_player = min(highscore_dict, key=highscore_dict.get)
+            # removes the player from dict
+            highscore_dict.pop(lowest_player)
+        view_highscore(highscore_dict)
+
+    else:
+        print(f"Tyvärr räckte dina poäng inte hela vägen till topp {max_slots}.")
+
+    return highscore_dict
+
+
+def load_highscore(path="quiz_highscore.json"):
+    """Loads and returns highscorelist from json file.
+    if the file is missing or corrupt it will return an empty dict.
+    """
+    if not os.path.exists(path):
+        print(f"Hittade inte '{path}'. Returnerar en tom highscore-lista.")
+        return {}
+
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except json.JSONDecodeError:
+        print(f"Fel: Filen '{path}' är korrupt eller felaktigt formaterad.")
+        return {}
+    except Exception as e:
+        print(f"Ett fel uppstod när highscore skulle laddas: {e}")
+        return {}
+
+
+def save_highscore(highscore_dict, path = "quiz_highscore.json"):
+    """save a dictionary med highscores to a json file"""
+    try:
+        with open(path, "w", encoding="utf-8") as file:
+            # indent=4 makes this easy to read in external texteditor
+            json.dump(highscore_dict, file, indent=4, ensure_ascii=False)
+        print(f"Highscore har sparats i {path}!")
+    except Exception as e:
+        print(f"Ett fel uppstod när highscore skulle sparas: {e}")
 
 # TODO:  add name from argparse if written
 def get_user_name():
-    """get and return the user name, strip whitespace and capitalize first letter of each word"""
-    return input("Vad heter du? ").strip().lower().title()
+    """ Uses argparse if provided, otherwise prompts via user input
+    get and return the user name, strip whitespace and capitalize first letter of each word"""
+    parser = argparse.ArgumentParser(description="Quiz-spel")
+    parser.add_argument(
+        "-n",
+        "--name",
+        type=str,
+        help="Ange ditt namn direkt vid start av spelet, admin för tillgång till admin menyn"
+    )
+    #prevents crash if other arguments is added
+    args, _ = parser.parse_known_args()
+
+    if args.name:
+        name = args.name
+    else:
+        name = input("Vad heter du? ")
+    
+    return name.strip().lower().title()
 
 def is_valid_category(category):
     """ checks if the category is valid in the Categories list and returns True/False"""
     return category in CATEGORIES or category == "blandat"
 
-# should return True/False
 def check_password(password):
+    """checks if password is correct and returns True/False"""
     if PASSWORD == password:
         return True
     else:
         return False
 
 
-def run_quiz(current_quiz):
-    """runs the quiz loop, prints questions, receive input, check if answer is correct and handles points"""
-    score = 0
-    
-    for q in current_quiz.questions:
-        print(f"\nKategori: {q.category}")
-        print(f"Fråga: {q.text}")
-        
-        # We control if the object is a multiple choice question
-        if isinstance(q, MultipleChoiceQuestion):
-            letters = "abcd"
-            for i, option in enumerate(q.options):
-                print(f"  {letters[i]}) {option}")
-                
-        guess = input("\nDitt svar: ").strip().lower()
-        
-        if q.check_answer(guess):
-            print("Rätt svar! 🎉\n\n")
-            score += 1
-        else:
-            print(f"Tyvärr fel, rätt svar var: {q.answer}")
-            
-    print(f"\nQuizet är slut! Du fick {score} av {len(current_quiz.questions)} rätt.")
-    
 def get_number_of_questions(prompt, max_questions):
     """takes input and checks if it is a integer in the valid interval and returns the number""" 
     while True:
@@ -276,7 +311,7 @@ def filter_by_category(all_questions, category):
     return [q for q in all_questions if q.category == category]
 
 
-def run_quiz(current_quiz):
+def run_quiz(name, highscore_dict, current_quiz):
     score = 0
 
     for q in current_quiz.questions:
@@ -296,14 +331,17 @@ def run_quiz(current_quiz):
         else:
             print(f"Tyvärr fel, rätt svar var: {q.answer}\n")
 
-    print(f"\nQuizet är slut! Du fick {score} av {len(current_quiz.questions)} rätt.")
-    check_if_highscore(score)
+    print(f"nQuizet är slut! Du fick {score} av {len(current_quiz.questions)} rätt.")
+    check_if_highscore(name, score, highscore_dict, max_slots=5)
+    save_highscore(highscore_dict)
 
     return score
 
 def main():
     """Main function, loads questions at start and then connects all input and menus in order."""
     all_questions = Question.load_from_file()  #Load questions from file at the start of the program
+    highscore_dict = load_highscore()
+
     print("Välkommen!")
 
     while True:
@@ -333,11 +371,11 @@ def main():
             f"Max antal för {category} är {max_questions}: ", max_questions)
 
         my_quiz = Quiz(all_questions, number, category)
-        run_quiz(my_quiz)
+        run_quiz(name, highscore_dict, my_quiz)
         play_again = get_menu_choice(["y","n"], prompt="Vill du spela igen? (y/n): ")
         if play_again == "n":
 
-            view_highscore()
+            view_highscore(highscore_dict)
             print("Tack för din tid, välkommen åter!")
             break
 
