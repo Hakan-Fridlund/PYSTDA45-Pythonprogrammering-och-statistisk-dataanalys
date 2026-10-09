@@ -24,10 +24,9 @@ import pickle
 from pickle import UnpicklingError
 import argparse
 import os
+import sys
 
 CATEGORIES = ("matematik", "natur", "geografi") # tuple for categories constant
-score = 0
-max_points = 0
 highscore = {}
 PASSWORD = "admin123"
 class Question:
@@ -42,7 +41,7 @@ class Question:
         self.category = category
 
     def __str__(self):
-        return (f"Question: {self.text}\nAnswer: {self.answer}\nCategory: {self.category}")
+        return f"Question: {self.text}\nAnswer: {self.answer}\nCategory: {self.category}"
 
     def check_answer(self, given_answer):
         return given_answer == self.answer
@@ -54,7 +53,7 @@ class Question:
             with open(path, "wb") as file:
                 pickle.dump(questions_list, file)
             print(f"Frågorna har sparats framgångsrikt i {path}!")
-        except Exception as e:
+        except OSError as e:
             print(f"Ett fel uppstod när filen skulle sparas: {e}")
 
     @classmethod
@@ -70,7 +69,7 @@ class Question:
         except UnpicklingError:
             print(f"Fel: Filen '{path}' är korrupt (kan ha öppnats i en texteditor).")
             return []
-        except Exception as e:
+        except OSError as e:
             print(f"Ett fel uppstod när filen skulle laddas: {e}")
             return []
 
@@ -119,7 +118,7 @@ class Quiz: # pylint: disable=too-few-public-methods
             f"{self.number_of_questions}\nQuestions: {self.questions}\nCategory: {self.category}")
 
 
-def admin_menu(all_questions):
+def admin_menu(all_questions, highscore_dict):
     """ Runs the hidden admin menu to call admin functions"""
     while True:
         print("\nAdmin menu")
@@ -138,9 +137,11 @@ def admin_menu(all_questions):
             case "3":
                 remove_question(all_questions)
             case "4":
-                view_highscore()
+                view_highscore(highscore_dict)
             case "5":
                 Question.save_to_file(all_questions)
+                #removes the argparse arguments so the name is not locked to admin or the argument
+                sys.argv = [sys.argv[0]]
                 break
 
 
@@ -158,10 +159,10 @@ def get_menu_choice(valid_choices, prompt="Välj ett alternativ: "):
 def add_question(all_questions):
     """Adds question by input. appends open och mpc-question to list"""
     category = get_menu_choice(CATEGORIES, f"Välj en kategori {CATEGORIES} ")
-    type = get_menu_choice(["1","2"],"Vill du lägga till en öppen eller flervalsfråga?\n"
+    current_type = get_menu_choice(["1","2"],"Vill du lägga till en öppen eller flervalsfråga?\n"
                             "(1) för öppen fråga\n(2) för flervalsfråga\n: ")
     text = input("Ange din fråga: ")
-    if type == "1":
+    if current_type == "1":
         answer = input("Ange svaret: ").strip().lower()
         my_question = OpenQuestion(text, answer, category)
     else:
@@ -188,7 +189,7 @@ def show_questions(all_questions):
 def remove_question(all_questions):
     """ shows all questions, takes index input to remove from list, 0 to cancel"""
     show_questions(all_questions)
-    # creates a list strings of valid inputs from 0 to the length of questions in all_questions 
+    # creates a list strings of valid inputs from 0 to the length of questions in all_questions
     valid = ["0"] + [str(i) for i in range(1, len(all_questions) + 1)]
 
     choice = get_menu_choice(valid, "Nummer att ta bort (0 = avbryt): ")
@@ -203,6 +204,7 @@ def view_highscore(highscore_dict):
     if not highscore_dict:
         print("Topplistan är tom just nu!")
         return
+    print("\n HIGHSCORELISTAN:")
     for name, current_score in highscore_dict.items():
         print(f"{name}: {current_score} poäng")
 
@@ -242,7 +244,7 @@ def load_highscore(path="quiz_highscore.json"):
     except json.JSONDecodeError:
         print(f"Fel: Filen '{path}' är korrupt eller felaktigt formaterad.")
         return {}
-    except Exception as e:
+    except OSError as e:
         print(f"Ett fel uppstod när highscore skulle laddas: {e}")
         return {}
 
@@ -254,10 +256,9 @@ def save_highscore(highscore_dict, path = "quiz_highscore.json"):
             # indent=4 makes this easy to read in external texteditor
             json.dump(highscore_dict, file, indent=4, ensure_ascii=False)
         print(f"Highscore har sparats i {path}!")
-    except Exception as e:
+    except OSError as e:
         print(f"Ett fel uppstod när highscore skulle sparas: {e}")
 
-# TODO:  add name from argparse if written
 def get_user_name():
     """ Uses argparse if provided, otherwise prompts via user input
     get and return the user name, strip whitespace and capitalize first letter of each word"""
@@ -275,7 +276,7 @@ def get_user_name():
         name = args.name
     else:
         name = input("Vad heter du? ")
-    
+
     return name.strip().lower().title()
 
 def is_valid_category(category):
@@ -349,9 +350,9 @@ def main():
 
         if name == "Admin":
             if check_password(input("Ange lösenord: ")):
-                admin_menu(all_questions)
-                continue
-                # when admin logs out, we move to next iteration of the loop (or break if you want to exit)
+                admin_menu(all_questions, highscore_dict)
+
+                # when admin logs out, we move to next iteration of the loop
             else:
                 print("Fel lösenord!")
                 continue
