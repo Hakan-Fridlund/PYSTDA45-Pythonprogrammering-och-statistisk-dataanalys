@@ -11,12 +11,11 @@ Added features:
 - option for user to change how many questions are asked in the quiz, and what category or mixed
 - defended against invalid input from the user
 - rewritten the code to classes and functions to make it more readable and maintainable
-- add categories to the questions and let the user choose which category or mixed to play if wanted
 - separated code and data, read questions, highscore and secure password from file
 
 SUGGESTED IMPROVEMENTS:
 - use command line arguments when starting file to access the admin menu (argparse) 
-- save highscore to same file and load when starting, showing top 5 after the quiz. save in system file json
+- save highscore to same file and load when starting, showing top 5 after the quiz.
 - use encrypted password for admin menu, saved as hash or salted hash, not plain text
 - being able to change password for admin menu from within the admin menu
 """
@@ -33,7 +32,6 @@ score = 0
 max_points = 0
 highscore = 0
 PASSWORD = "admin123"  # TODO: password for admin menu should be salted hash and saved in file
-all_questions = []
 
 class Question:
     """quiz question with a text(the question) and a correct answer.
@@ -54,7 +52,7 @@ class Question:
 
     @classmethod
     def save_to_file(cls, questions_list, path="quiz_questions.pkl"):
-        """Klassmetod för att spara en lista med frågeobjekt."""
+        """Class method to save a list with questions to file."""
         try:
             with open(path, "wb") as file:
                 pickle.dump(questions_list, file)
@@ -64,13 +62,17 @@ class Question:
 
     @classmethod
     def load_from_file(cls, path="quiz_questions.pkl"):
-        """Klassmetod för att ladda och returnera en lista med frågeobjekt."""
+        """Class method to load and return a list with question from file."""
         if not os.path.exists(path):
             print(f"Hittade inte '{path}'. Returnerar en tom lista.")
             return []
         try:
             with open(path, "rb") as file:
+                print(f"{path} loaded.")
                 return pickle.load(file)
+        except UnpicklingError:
+            print(f"Fel: Filen '{path}' är korrupt (kan ha öppnats i en texteditor).")
+            return []
         except Exception as e:
             print(f"Ett fel uppstod när filen skulle laddas: {e}")
             return []
@@ -119,7 +121,7 @@ class Quiz: # pylint: disable=too-few-public-methods
         return (f"Number of questions: {self.number_of_questions}\nQuestions: {self.questions}\nCategory: {self.category}")
 
 
-def admin_menu():
+def admin_menu(all_questions):
     """ Runs the hidden admin menu to call admin functions"""
     while True:
         print("\nAdmin menu")
@@ -133,11 +135,11 @@ def admin_menu():
 
         match choice:
             case "1":
-                add_question()
+                add_question(all_questions)
             case "2":
-                show_questions()
+                show_questions(all_questions)
             case "3":
-                remove_question()
+                remove_question(all_questions)
             case "4":
                 change_password()
             case "5":
@@ -158,10 +160,11 @@ def get_menu_choice(valid_choices, prompt="Välj ett alternativ: "):
         print("Ogiltigt val, försök igen.\n")
 
 
-def add_question():
+def add_question(all_questions):
     """Adds question by input. appends open och mpc-question to list"""
     category = get_menu_choice(CATEGORIES, f"Välj en kategori {CATEGORIES} ")
-    type = get_menu_choice(["1","2"],"Vill du lägga till en öppen eller flervalsfråga?\n(1) för öppen fråga\n(2) för flervalsfråga\n: ")
+    type = get_menu_choice(["1","2"],"Vill du lägga till en öppen eller flervalsfråga?\n"
+                            "(1) för öppen fråga\n(2) för flervalsfråga\n: ")
     text = input("Ange din fråga: ")
     if type == "1":
         answer = input("Ange svaret: ").strip().lower()
@@ -178,16 +181,36 @@ def add_question():
 
     all_questions.append(my_question)
 
-# TODO show questions
-def show_questions():
-    ...
-def remove_question():
-    ...
+
+def show_questions(all_questions):
+    """ prints all questions with index and category"""
+    if not all_questions:
+        print("Listan är tom.")
+        return
+    for i, q in enumerate(all_questions, start=1):
+        print(f"{i}. [{q.category}]) {q.text}")
+    
+def remove_question(all_questions):
+    """ shows all questions, takes index input to remove from list, 0 to cancel"""
+    show_questions(all_questions)
+    # creates a list strings of valid inputs from 0 to the length of questions in all_questions 
+    valid = ["0"] + [str(i) for i in range(1, len(all_questions) + 1)]
+
+    choice = get_menu_choice(valid, "Nummer att ta bort (0 = avbryt): ")
+    if choice == "0":
+        return
+    removed = all_questions.pop(int(choice) - 1)
+    print(f"Tog bort: {removed.text}")
+
+
 def change_password():
     ...
 def view_highscore():
     ...
 def check_if_highscore(score):
+    ...
+# TODO load encrypted password from file
+def load_password(path):
     ...
 
 
@@ -200,22 +223,23 @@ def is_valid_category(category):
     """ checks if the category is valid in the Categories list and returns True/False"""
     return category in CATEGORIES or category == "blandat"
 
-# should return True/False 
+# should return True/False
 def check_password(password):
     if PASSWORD == password:
         return True
     else:
         return False
 
-# this function should print the questions, receive input and check if correct. and handle points
+
 def run_quiz(current_quiz):
+    """runs the quiz loop, prints questions, receive input, check if answer is correct and handles points"""
     score = 0
     
     for q in current_quiz.questions:
         print(f"\nKategori: {q.category}")
         print(f"Fråga: {q.text}")
         
-        # Vi kontrollerar om objektet är en flervalsfråga
+        # We control if the object is a multiple choice question
         if isinstance(q, MultipleChoiceQuestion):
             letters = "abcd"
             for i, option in enumerate(q.options):
@@ -224,7 +248,7 @@ def run_quiz(current_quiz):
         guess = input("\nDitt svar: ").strip().lower()
         
         if q.check_answer(guess):
-            print("Rätt svar! 🎉\n")
+            print("Rätt svar! 🎉\n\n")
             score += 1
         else:
             print(f"Tyvärr fel, rätt svar var: {q.answer}")
@@ -254,38 +278,40 @@ def filter_by_category(all_questions, category):
 
 def run_quiz(current_quiz):
     score = 0
-    
+
     for q in current_quiz.questions:
         print(f"Fråga: {q.text}")
-        
+
         # controls if it is multiple choice class
         if isinstance(q, MultipleChoiceQuestion):
             letters = "abcd"
             for i, option in enumerate(q.options):
                 print(f"  {letters[i]}) {option}")
-                
+
         guess = input("\nDitt svar: ").strip().lower()
-        
+
         if q.check_answer(guess):
             print("Rätt svar! 🎉")
             score += 1
         else:
             print(f"Tyvärr fel, rätt svar var: {q.answer}\n")
-            
+
     print(f"\nQuizet är slut! Du fick {score} av {len(current_quiz.questions)} rätt.")
+    check_if_highscore(score)
+
     return score
 
 def main():
     """Main function, loads questions at start and then connects all input and menus in order."""
-    all_questions = Question.load_from_file()  # Load questions from file at the start of the program
+    all_questions = Question.load_from_file()  #Load questions from file at the start of the program
     print("Välkommen!")
-    
+
     while True:
         name = get_user_name()
-        
+
         if name == "Admin":
             if check_password(input("Ange lösenord: ")):
-                admin_menu()
+                admin_menu(all_questions)
                 continue
                 # when admin logs out, we move to next iteration of the loop (or break if you want to exit)
             else:
@@ -310,7 +336,9 @@ def main():
         run_quiz(my_quiz)
         play_again = get_menu_choice(["y","n"], prompt="Vill du spela igen? (y/n): ")
         if play_again == "n":
+
+            view_highscore()
             print("Tack för din tid, välkommen åter!")
             break
-        
+
 main()
