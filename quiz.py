@@ -202,8 +202,11 @@ def view_highscore(highscore_dict):
     if not highscore_dict:
         print("Topplistan är tom just nu!")
         return
-    print("\n HIGHSCORELISTAN:")
-    for name, current_score in highscore_dict.items():
+    print("\nHIGHSCORELISTAN:")
+    #sorted function here makes a list of tuples instead of dictionary 
+    sorted_highscore = sorted(highscore_dict.items(), key=lambda item: item[1], reverse=True)
+    
+    for name, current_score in sorted_highscore:
         print(f"{name}: {current_score} poäng")
 
 
@@ -273,7 +276,11 @@ def get_user_name():
     if args.name:
         name = args.name
     else:
-        name = input("Vad heter du? ")
+        while True:
+            name = input("Vad heter du? ").strip()
+            if name:
+                break
+            print("Namnet får inte lämnas tomt, du måste skriva något.")
 
     return name.strip().lower().title()
 
@@ -349,7 +356,7 @@ def main():
         if name == "Admin":
             if check_password(input("Ange lösenord: ")):
                 admin_menu(all_questions, highscore_dict)
-
+                continue
             else:
                 print("Fel lösenord!")
                 continue
