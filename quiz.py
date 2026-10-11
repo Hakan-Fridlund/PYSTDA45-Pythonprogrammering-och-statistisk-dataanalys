@@ -329,7 +329,9 @@ def run_quiz(name, highscore_dict, current_quiz):
             for i, option in enumerate(q.options):
                 print(f"  {letters[i]}) {option}")
 
-        guess = input("\nDitt svar: ").strip().lower()
+            guess = get_menu_choice(["a", "b", "c", "d"], prompt="\nDitt svar (a, b, c, d): ")
+        else:
+            guess = input("\nDitt svar: ").strip().lower()
 
         if q.check_answer(guess):
             print("Rätt svar! 🎉")
