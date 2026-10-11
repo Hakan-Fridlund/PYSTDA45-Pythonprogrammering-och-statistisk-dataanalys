@@ -356,7 +356,7 @@ def main():
         name = get_user_name()
 
         if name == "Admin":
-            if check_password(input("Ange lösenord: ")):
+            if check_password(input("Ange lösenord: ").strip()):
                 admin_menu(all_questions, highscore_dict)
                 continue
             else:
