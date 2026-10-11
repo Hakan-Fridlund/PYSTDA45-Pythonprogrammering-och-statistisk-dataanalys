@@ -377,4 +377,6 @@ def main():
             print("Tack för din tid, välkommen åter!")
             break
 
-main()
+
+if __name__ == "__main__":
+    main()
