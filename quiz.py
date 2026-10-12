@@ -27,12 +27,12 @@ import sys
 CATEGORIES = ("matematik", "natur", "geografi") # tuple for categories constant
 highscore = {}
 PASSWORD = "admin123"
+
 class Question:
     """quiz question with a text(the question) and a correct answer.
 
     check_answer() compares a given answer to the correct one.
     """
-
     def __init__(self, text, answer, category):
         self.text = text
         self.answer = answer
