@@ -1,0 +1,13 @@
+ID,Name,Age,Score,Major
+101,Alice Smith,20,88,Computer Science
+102,Bob Jones,22,74,Mathematics
+103,Charlie Brown,19,95,Physics
+104,Diana Prince,21,91,Computer Science
+105,Evan Wright,23,65,History
+
+--- END OF DATA ---
+Notes for the Python exercise:
+- Python is fun to learn!
+- Data analysis is a useful skill.
+- Remember to close the file after reading it, or use the 'with' statement.
+Total lines of data: 5.

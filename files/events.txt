@@ -1,0 +1,8 @@
+INFO: Program started
+WARN: Low battery
+ERROR: File missing
+INFO: Data loaded
+WARN: Low disk space
+INFO: Processing finished
+ERROR: Connection failed
+INFO: Program stopped
