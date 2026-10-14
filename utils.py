@@ -1,3 +1,7 @@
+"""
+For test excersise, importing to another file for functionality
+"""
+
 def is_even(n):
     if n % 2 == 0:
         return True
