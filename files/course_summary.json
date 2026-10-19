@@ -1,0 +1,27 @@
+[
+    {
+        "course": "Gränssnittsdesign",
+        "n_students": 6,
+        "avg_points": 36.5
+    },
+    {
+        "course": "Webbutveckling 1",
+        "n_students": 9,
+        "avg_points": 71.89
+    },
+    {
+        "course": "Datateknik",
+        "n_students": 7,
+        "avg_points": 37.43
+    },
+    {
+        "course": "Nätverksteknik",
+        "n_students": 9,
+        "avg_points": 69.33
+    },
+    {
+        "course": "Programmering 1",
+        "n_students": 9,
+        "avg_points": 64.22
+    }
+]
